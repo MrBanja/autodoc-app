@@ -20,7 +20,6 @@ class UserRole(Base, DbController):
 
     ACCOUNTANT = 1
     WORKER = 2
-    SERVICE = 3
 
     id: IntColumnType = sa.Column(sa.Integer(), primary_key=True)
     name: StrColumnType = sa.Column(sa.String, nullable=False, unique=True)
@@ -118,7 +117,6 @@ class Order(Base, DbController):
     status_id: int | sa.Column = sa.Column(sa.Integer(), sa.ForeignKey(OrderStatus.id), nullable=False)
     created_at: DateTimeColumnType = sa.Column(sa.DateTime(), default=datetime.now, nullable=False)
     status_changed_at: DateTimeColumnType = sa.Column(sa.DateTime())
-    waiting_for_at: DateTimeColumnType = sa.Column(sa.DateTime())  # Not using it for now
 
     @staticmethod
     async def create_with_push(

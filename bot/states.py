@@ -31,7 +31,7 @@ class OrderView(StatesGroup):
 
 
 class OrderDetailedView(StatesGroup):
-    change_status = State()
+    action = State()
     status = State()
 
 
@@ -61,4 +61,8 @@ class WorkerAskDocument(StatesGroup):
 
 
 class DocumentAskedByWorker(StatesGroup):
+    action = State()
+
+
+class CellManage(StatesGroup):
     action = State()

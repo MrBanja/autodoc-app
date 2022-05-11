@@ -24,15 +24,17 @@ class AbstractKeyBoard(metaclass=abc.ABCMeta):
         return get_all_enum_values(cls.Button)
 
     @classmethod
-    async def get_reply_markup(cls, user: User, *args, **kwargs) -> types.ReplyKeyboardMarkup:
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-
+    async def _get_keys(cls, user: User, *args, **kwargs) -> list[str]:
         exclude_set = None
         extra_set = {c.value for c in cls.extra_buttons}
         if user.role_id != UserRole.ACCOUNTANT:
             exclude_set = {c.value for c in cls.accountant_buttons}
+        return get_all_enum_values(cls.Button, except_values=exclude_set, extra_values=extra_set)
 
-        markup.add(*get_all_enum_values(cls.Button, except_values=exclude_set, extra_values=extra_set))
+    @classmethod
+    async def get_reply_markup(cls, user: User, *args, **kwargs) -> types.ReplyKeyboardMarkup:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup.add(*(await cls._get_keys(user, *args, **kwargs)))
         return markup
 
 
@@ -115,6 +117,16 @@ class OrderDetailedViewKeyBoard(AbstractKeyBoard):
 
     class Button(str, enum.Enum):
         change_status = "Сменить статус"
+        open_cell = "Открыть ячейку"
+
+    @classmethod
+    async def _get_keys(cls, user: User, *args, **kwargs) -> list[str]:
+        resp: list[str] = [button.value for button in cls.extra_buttons]
+        if kwargs.get('with_open_cell', False):
+            resp.append(cls.Button.open_cell.value)
+        if user.role_id == UserRole.ACCOUNTANT:
+            resp.append(cls.Button.change_status.value)
+        return resp
 
 
 class OrderChangeStatusKeyBoard(AbstractKeyBoard):
